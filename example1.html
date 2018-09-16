@@ -20,13 +20,11 @@
 			var panx = -100;
 			var pany = 0;
 			var zoom = 200;
-			var palette = [];
 
 			// Iterations per pixel
-			var maxiterations = 20;
+			var maxiterations = 25;
 
 			function init(){
-				generatePalette();
 				generateImage();
 				main();
 			}
@@ -34,24 +32,6 @@
 			function main(){
 				window.requestAnimationFrame(main);
 				context.putImageData(imagedata, 0, 0);
-			}
-
-			function generatePalette(){
-				// Gradient
-				var roffset = 24;
-				var goffset = 16;
-				var boffset = 0;
-				for(var i=0; i<256; i++) {
-					palette[i] = { r:roffset, g:goffset, b:boffset};
-
-					if(i < 64){
-						roffset += 3;
-					}else if (i<128){
-						goffset += 3;
-					}else if (i<192){
-						boffset += 3;
-					}
-				}
 			}
 
 			function generateImage(){
@@ -89,10 +69,9 @@
 				// Get palette color based on the number of iterations
 				var color;
 				if(iterations == maxiterations){
-					color = {r:0, g:0, b:0}; // Black
+					color = {r:255, g:0, b:0}; // Red
 				}else{
-					var index = Math.floor((iterations / (maxiterations-1)) * 255);
-					color = palette[index];
+					color = {r:0, g:0, b:0}; // Black
 				}
 
 				// Apply color
