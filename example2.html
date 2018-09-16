@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>#make fractals</title>
+	<style type="text/css">
+		body{
+			margin:0;
+		}
+	</style>
+	<script src="https://cdn.rawgit.com/mrdoob/three.js/master/build/three.min.js"></script>
+	</head>
+	<body>
+		<script id="vertexShader" type="x-shader/x-vertex">
+			precision highp float;
+			uniform float zoom;
+			uniform float mod;
+			uniform float time;
+			varying vec2 pos;
+
+			void main(){
+				pos = position.xy * zoom + sin(mod) * 0.25;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			}
+		</script>
+		<script id="fragmentShader" type="x-shader/x-fragment">
+			precision highp float;
+			uniform float mod;
+			uniform float time;
+			varying vec2 pos;
+
+			void main(){
+				vec2 fractal;
+				
+				for(int i = 0; i < 15; i++){
+					fractal = pos + vec2(fractal.x * fractal.x - fractal.y * fractal.y - 0.5, (2.0 + cos(time)) * fractal.x * fractal.y);
+					gl_FragColor = vec4(cos(time) + mod * fractal.y + cos(time), 1.0 + fractal+sin(time+mod), 1.0);
+				}
+			}
+		</script>
+		<script type="text/javascript">
+			var width = window.innerWidth;
+			var height = window.innerHeight;
+			var clock = new THREE.Clock(); 
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10);
+			var renderer = new THREE.WebGLRenderer();
+			var time = 0;
+
+			camera.position.z = 0.5;
+			renderer.setSize(width, height);
+			document.body.appendChild(renderer.domElement);
+
+			var geometry = new THREE.PlaneGeometry(2, 2, 0);
+			var material = new THREE.ShaderMaterial({uniforms:{zoom:{type:"f", value:3}, mod:{type:"f", value:2}, time:{type:"f", value:0}}, vertexShader:document.getElementById("vertexShader").innerHTML, fragmentShader:document.getElementById("fragmentShader").innerHTML});
+			var mesh = new THREE.Mesh(geometry, material);
+
+			scene.add(mesh);
+
+			function mainloop(delta){
+				requestAnimationFrame(mainloop);
+				time = clock.getElapsedTime();
+
+				camera.rotation.z = delta / 3000;
+				mesh.material.uniforms.mod.value = Math.cos(delta / 400) + 4.5;
+				mesh.material.uniforms.time.value = time;
+				mesh.material.uniforms.zoom.value = Math.sin(delta/1000) + 4.0;
+				renderer.render(scene, camera);
+			}
+
+			mainloop();
+		</script>
+	</body>
+</html>
